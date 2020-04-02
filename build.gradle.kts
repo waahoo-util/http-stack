@@ -12,9 +12,10 @@ repositories {
 }
 
 dependencies {
+
   val coroutineVer = "1.3.5"
   val serializationVer = "0.20.0"
-  implementation(kotlin("stdlib-jdk8"))
+  implementation(kotlin("stdlib-jdk8","1.3.71"))
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVer")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVer")
   implementation("com.squareup.okhttp3:okhttp:4.4.1")
