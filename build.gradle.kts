@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.waahoo"
-version = "0.0.1"
+version = "0.0.3"
 
 repositories {
   mavenCentral()
@@ -25,10 +25,10 @@ dependencies {
 
 tasks {
   compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "9"
   }
   compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "9"
   }
 }
 
