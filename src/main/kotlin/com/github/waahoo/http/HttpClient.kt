@@ -1,17 +1,25 @@
 package com.github.waahoo.http
 
-import com.github.waahoo.http.CookieMangement.cookieMgr
 import okhttp3.JavaNetCookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.Level.NONE
+import java.net.CookieHandler
+import java.net.CookieManager
+import java.net.CookiePolicy
+import java.net.CookieStore
 
 const val userAgent =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
 
-fun makeClient(logLevel: HttpLoggingInterceptor.Level = NONE) =
-  OkHttpClient.Builder()
-    .cookieJar(JavaNetCookieJar(cookieMgr))
+fun makeClient(cookieStore: CookieStore? = null, logLevel: HttpLoggingInterceptor.Level = NONE) =
+  OkHttpClient.Builder().also {
+    if (cookieStore != null) {
+      val cookieMgr = CookieManager(cookieStore, CookiePolicy.ACCEPT_ALL)
+      CookieHandler.setDefault(cookieMgr)
+      it.cookieJar(JavaNetCookieJar(cookieMgr))
+    }
+  }
     .addNetworkInterceptor { chain ->
       val req = chain.request()
       chain.proceed(
@@ -22,3 +30,14 @@ fun makeClient(logLevel: HttpLoggingInterceptor.Level = NONE) =
     }
     .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(logLevel))
     .build()
+
+lateinit var client: OkHttpClient
+
+fun initClient(cookieStore: CookieStore? = null, logLevel: HttpLoggingInterceptor.Level = NONE) {
+  client = makeClient(cookieStore, logLevel)
+}
+
+fun closeClient() {
+  if (::client.isInitialized)
+    client.close()
+}

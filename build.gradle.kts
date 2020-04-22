@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.waahoo-util"
-version = "0.0.7"
+version = "0.0.8"
 
 repositories {
   mavenCentral()
@@ -18,7 +18,7 @@ dependencies {
   api("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVer")
   api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVer")
   api("com.squareup.okhttp3:okhttp:4.4.1")
-  implementation("com.squareup.okhttp3:logging-interceptor:4.4.1")
+  api("com.squareup.okhttp3:logging-interceptor:4.4.1")
   implementation("com.squareup.okhttp3:okhttp-urlconnection:4.4.1")
 }
 
