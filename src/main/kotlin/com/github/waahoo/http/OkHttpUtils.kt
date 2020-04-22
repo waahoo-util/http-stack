@@ -1,5 +1,3 @@
-@file:Suppress("NOTHING_TO_INLINE")
-
 package com.github.waahoo.http
 
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -31,7 +29,7 @@ data class ContentRange(val start: Long, val end: Long, val size: Long) {
   }
 }
 
-inline fun url(
+fun url(
   scheme: String, host: String, path: String,
   vararg queryParams: String
 ) = HttpUrl.Builder()
@@ -45,7 +43,7 @@ inline fun url(
     }
   }.build()
 
-inline fun HttpUrl.url(
+fun HttpUrl.url(
   path: String,
   vararg queryParams: Any
 ) =
@@ -56,7 +54,7 @@ inline fun HttpUrl.url(
     }
   }.build()
 
-inline fun headers(vararg headers: String) = Headers.headersOf(*headers)
+fun headers(vararg headers: String) = Headers.headersOf(*headers)
 
 val emptyHeaders = Headers.Builder().build()
 
