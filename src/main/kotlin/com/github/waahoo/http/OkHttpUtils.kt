@@ -10,6 +10,12 @@ import java.io.OutputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+private val _client = lazy {
+  makeClient()
+}
+val client
+  get() = _client.value
+
 data class ContentRange(val start: Long, val end: Long, val size: Long) {
   companion object {
     fun ContentRange(start: Long, size: Long) = ContentRange(start, size + start - 1, size)

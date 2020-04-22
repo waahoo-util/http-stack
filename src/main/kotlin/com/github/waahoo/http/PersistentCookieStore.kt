@@ -3,10 +3,7 @@ package com.github.waahoo.http
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.list
 import java.io.File
-import java.net.CookieManager
-import java.net.CookieStore
-import java.net.HttpCookie
-import java.net.URI
+import java.net.*
 
 object PersistentCookieStore : CookieStore by CookieManager().cookieStore {
   @Serializable
@@ -40,24 +37,23 @@ object PersistentCookieStore : CookieStore by CookieManager().cookieStore {
   }
 
   @Serializable
-  data class Cookie(val uri: String, val entries: List<SerializableHttpCookie>)
+  data class CookieEntry(val uri: String, val cookies: List<SerializableHttpCookie>)
 
   val cacheFile = File("cookie.json").apply {
     if (!exists()) {
       parentFile?.mkdirs()
       createNewFile()
       writeText(
-        json.stringify(
-          Cookie.serializer().list,
-          emptyList()
-        )
+        json.stringify(CookieEntry.serializer().list, emptyList())
       )
     }
   }
 
+  val cookieMgr: CookieManager
+
   init {
     val data = cacheFile.readText()
-    val cookies = json.parse(Cookie.serializer().list, data)
+    val cookies = json.parse(CookieEntry.serializer().list, data)
 
     cookies.forEach { (uriS, entries) ->
       val uri = URI.create(uriS)
@@ -65,6 +61,9 @@ object PersistentCookieStore : CookieStore by CookieManager().cookieStore {
         add(uri, it.toHttpCookie())
       }
     }
+
+    cookieMgr = CookieManager(PersistentCookieStore, CookiePolicy.ACCEPT_ALL)
+    CookieHandler.setDefault(cookieMgr)
   }
 
   fun save() {
@@ -75,10 +74,10 @@ object PersistentCookieStore : CookieStore by CookieManager().cookieStore {
           , it.maxAge, it.path, it.portlist, it.secure, it.isHttpOnly, it.version
         )
       }.toList()
-      Cookie(uri.toString(), cookieEntries)
+      CookieEntry(uri.toString(), cookieEntries)
     }.toList()
 
-    val data = json.stringify(Cookie.serializer().list, cookies)
+    val data = json.stringify(CookieEntry.serializer().list, cookies)
     cacheFile.writeText(data)
     println("flush cookies to disk!")
   }
