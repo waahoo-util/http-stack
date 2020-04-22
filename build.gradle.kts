@@ -5,14 +5,13 @@ plugins {
 }
 
 group = "com.github.waahoo"
-version = "0.0.3"
+version = "0.0.4"
 
 repositories {
   mavenCentral()
 }
 
 dependencies {
-
   val coroutineVer = "1.3.5"
   val serializationVer = "0.20.0"
   implementation(kotlin("stdlib-jdk8","1.3.71"))

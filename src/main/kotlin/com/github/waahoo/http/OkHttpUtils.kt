@@ -143,6 +143,23 @@ suspend fun OkHttpClient.post(
   }
 }
 
+suspend fun OkHttpClient.post(
+  url: HttpUrl, headers: Headers = emptyHeaders,
+  form: Map<String, String> = emptyMap()
+): String {
+  val data = FormBody.Builder().apply {
+    form.forEach { (k, v) ->
+      add(k, v)
+    }
+  }.build()
+  val request = Request.Builder().url(url).headers(headers).post(data).build()
+  val response = newCall(request).await()
+  if (!response.isSuccessful) throw IOException()
+  response.use {
+    return it.body?.string() ?: ""
+  }
+}
+
 suspend fun OkHttpClient.download(
   out: OutputStream, url: String,
   headers: Map<String, String> = emptyMap(),

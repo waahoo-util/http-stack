@@ -1,6 +1,5 @@
 package com.github.waahoo.http
 
-import com.github.waahoo.bilibili.util.PersistentCookieStore
 import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.CookiePolicy

@@ -1,6 +1,5 @@
-package com.github.waahoo.bilibili.util
+package com.github.waahoo.http
 
-import com.github.waahoo.http.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.list
 import java.io.File
