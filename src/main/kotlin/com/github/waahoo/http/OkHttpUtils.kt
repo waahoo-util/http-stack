@@ -3,6 +3,7 @@ package com.github.waahoo.http
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
 import okhttp3.Headers.Companion.toHeaders
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -151,6 +152,20 @@ suspend fun OkHttpClient.post(
     }
   }.build()
   val request = Request.Builder().url(url).headers(headers).post(data).build()
+  val response = newCall(request).await()
+  if (!response.isSuccessful) throw IOException()
+  response.use {
+    return it.body?.string() ?: ""
+  }
+}
+
+suspend fun OkHttpClient.post(
+  url: HttpUrl, headers: Headers = emptyHeaders,
+  body: String
+): String {
+  val request = Request.Builder().url(url)
+    .headers(headers)
+    .post(body.toRequestBody()).build()
   val response = newCall(request).await()
   if (!response.isSuccessful) throw IOException()
   response.use {
