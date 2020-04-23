@@ -3,13 +3,15 @@ package com.github.waahoo.http
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
 import okhttp3.Headers.Companion.toHeaders
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
+import okio.BufferedSink
+import okio.Okio
+import okio.source
+import java.io.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.math.sin
 
 data class ContentRange(val start: Long, val end: Long, val size: Long) {
   companion object {
@@ -74,6 +76,58 @@ suspend fun OkHttpClient.readBytes(url: String): ByteArray {
   return ByteArray(0)
 }
 
+suspend fun OkHttpClient.getCode(url: HttpUrl, headers: Headers = emptyHeaders): Pair<Int, String> {
+  val request = Request.Builder().url(url).headers(headers).build()
+  val response = newCall(request).await()
+  response.use {
+    return response.code to (it.body?.string() ?: "")
+  }
+}
+
+suspend fun OkHttpClient.postCode(
+  url: HttpUrl, headers: Headers = emptyHeaders,
+  body: String, mediaType: String? = null
+): Pair<Int, String> {
+  val request = Request.Builder().url(url)
+    .headers(headers)
+    .post(body.toRequestBody(mediaType?.toMediaTypeOrNull())).build()
+  val response = newCall(request).await()
+  response.use {
+    return response.code to (it.body?.string() ?: "")
+  }
+}
+
+suspend fun OkHttpClient.postCode(
+  url: HttpUrl, headers: Headers = emptyHeaders, body: InputStream, mediaType: String? = null
+): Pair<Int, String> {
+
+  val request = Request.Builder().url(url)
+    .headers(headers)
+    .post(
+      object : RequestBody() {
+        override fun contentType() = mediaType?.toMediaTypeOrNull()
+        override fun writeTo(sink: BufferedSink) {
+          sink.writeAll(body.source())
+        }
+      }
+    ).build()
+  val response = newCall(request).await()
+  response.use {
+    return response.code to (it.body?.string() ?: "")
+  }
+}
+
+suspend fun OkHttpClient.deleteCode(url: HttpUrl, headers: Headers = emptyHeaders): Pair<Int, String> {
+  val request = Request.Builder().url(url)
+    .headers(headers)
+    .delete().build()
+  val response = newCall(request).await()
+  response.use {
+    return response.code to (it.body?.string() ?: "")
+  }
+
+}
+
 suspend fun OkHttpClient.get(url: String, headers: Map<String, Any> = emptyMap()): String {
   getResp(url, headers).use {
     return it.body?.string() ?: ""
@@ -136,8 +190,8 @@ suspend fun OkHttpClient.post(
   }.build()
   val request = Request.Builder().url(url).headers(header).post(data).build()
   val response = newCall(request).await()
-  if (!response.isSuccessful) throw IOException()
   response.use {
+    if (!response.isSuccessful) throw IOException(it.body?.string() ?: "")
     return it.body?.string() ?: ""
   }
 }
@@ -153,22 +207,23 @@ suspend fun OkHttpClient.post(
   }.build()
   val request = Request.Builder().url(url).headers(headers).post(data).build()
   val response = newCall(request).await()
-  if (!response.isSuccessful) throw IOException()
   response.use {
+    if (!response.isSuccessful) throw IOException(it.body?.string() ?: "")
     return it.body?.string() ?: ""
   }
 }
 
 suspend fun OkHttpClient.post(
   url: HttpUrl, headers: Headers = emptyHeaders,
-  body: String
+  json: String,
+  mediaType: String? = null
 ): String {
   val request = Request.Builder().url(url)
     .headers(headers)
-    .post(body.toRequestBody()).build()
+    .post(json.toRequestBody(mediaType?.toMediaTypeOrNull())).build()
   val response = newCall(request).await()
-  if (!response.isSuccessful) throw IOException()
   response.use {
+    if (!response.isSuccessful) throw IOException(it.body?.string() ?: "")
     return it.body?.string() ?: ""
   }
 }
