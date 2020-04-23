@@ -73,7 +73,7 @@ suspend fun OkHttpClient.readBytes(url: String): ByteArray {
   return ByteArray(0)
 }
 
-suspend fun OkHttpClient.get(url: String, headers: Map<String, String> = emptyMap()): String {
+suspend fun OkHttpClient.get(url: String, headers: Map<String, Any> = emptyMap()): String {
   getResp(url, headers).use {
     return it.body?.string() ?: ""
   }
@@ -100,8 +100,8 @@ suspend fun OkHttpClient.getResp(url: HttpUrl, headers: Headers = emptyHeaders):
   return response
 }
 
-suspend fun OkHttpClient.getResp(url: String, headers: Map<String, String> = emptyMap()): Response {
-  val headerBuilder = headers.toHeaders()
+suspend fun OkHttpClient.getResp(url: String, headers: Map<String, Any> = emptyMap()): Response {
+  val headerBuilder = headers.entries.associate { (k, v) -> k to v.toString() }.toHeaders()
   val request = Request.Builder().url(url).headers(headerBuilder).build()
   val response = newCall(request).await()
   if (!response.isSuccessful) {
@@ -111,8 +111,8 @@ suspend fun OkHttpClient.getResp(url: String, headers: Map<String, String> = emp
   return response
 }
 
-suspend fun OkHttpClient.headResp(url: String, headers: Map<String, String> = emptyMap()): Response {
-  val headerBuilder = headers.toHeaders()
+suspend fun OkHttpClient.headResp(url: String, headers: Map<String, Any> = emptyMap()): Response {
+  val headerBuilder = headers.entries.associate { (k, v) -> k to v.toString() }.toHeaders()
   val request = Request.Builder().head().url(url).headers(headerBuilder).build()
   val response = newCall(request).await()
   if (!response.isSuccessful) {
@@ -124,13 +124,13 @@ suspend fun OkHttpClient.headResp(url: String, headers: Map<String, String> = em
 
 suspend fun OkHttpClient.post(
   url: String,
-  headers: Map<String, String> = emptyMap(),
-  form: Map<String, String> = emptyMap()
+  headers: Map<String, Any> = emptyMap(),
+  form: Map<String, Any> = emptyMap()
 ): String {
-  val header = headers.toHeaders()
+  val header = headers.entries.associate { (k, v) -> k to v.toString() }.toHeaders()
   val data = FormBody.Builder().apply {
     form.forEach { k, v ->
-      add(k, v)
+      add(k, v.toString())
     }
   }.build()
   val request = Request.Builder().url(url).headers(header).post(data).build()
@@ -143,11 +143,11 @@ suspend fun OkHttpClient.post(
 
 suspend fun OkHttpClient.post(
   url: HttpUrl, headers: Headers = emptyHeaders,
-  form: Map<String, String> = emptyMap()
+  form: Map<String, Any> = emptyMap()
 ): String {
   val data = FormBody.Builder().apply {
     form.forEach { (k, v) ->
-      add(k, v)
+      add(k, v.toString())
     }
   }.build()
   val request = Request.Builder().url(url).headers(headers).post(data).build()
@@ -160,7 +160,7 @@ suspend fun OkHttpClient.post(
 
 suspend fun OkHttpClient.download(
   out: OutputStream, url: String,
-  headers: Map<String, String> = emptyMap(),
+  headers: Map<String, Any> = emptyMap(),
   block: (Long, Long) -> Unit = { _, _ -> }
 ) {
   getResp(url, headers).use {
@@ -182,7 +182,7 @@ suspend fun OkHttpClient.download(
 
 suspend fun OkHttpClient.download(
   dest: File, url: String,
-  headers: Map<String, String> = emptyMap(),
+  headers: Map<String, Any> = emptyMap(),
   block: (Long, Long) -> Unit = { _, _ -> }
 ) {
   FileOutputStream(dest).use { out ->
