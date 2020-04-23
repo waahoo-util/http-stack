@@ -106,6 +106,7 @@ suspend fun OkHttpClient.postCode(
     .post(
       object : RequestBody() {
         override fun contentType() = mediaType?.toMediaTypeOrNull()
+        override fun contentLength() = body.available().toLong()
         override fun writeTo(sink: BufferedSink) {
           sink.writeAll(body.source())
         }
