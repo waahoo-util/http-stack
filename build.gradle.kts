@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.waahoo-util"
-version = "0.0.9"
+version = "1.0.0"
 
 repositories {
   mavenCentral()
